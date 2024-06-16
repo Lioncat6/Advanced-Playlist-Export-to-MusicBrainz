@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video List Formatter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            justify-content: center;
+            display: flex;
+            flex-direction: column;
+            margin: auto;
+            width: 50%;
+            text-align: center;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            background-color: #0074d9;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #444;
+        }
+
+        hr {
+            margin-top: 20px;
+            width: 100%;
+            border: 1px solid #333;
+        }
+        
+        a {
+            color : #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>MusicBrainz Formatter (<a href="https://github.com/Lioncat6/Advanced-Playlist-Export-to-MusicBrainz">Github</a>)</h1>
+    <textarea id="videoInput" rows="10" placeholder="Paste your video list here"></textarea>
+    <button onclick="formatVideoList()">Format List</button>
+    <textarea id="videoOutput" rows="10" placeholder="Paste your video list here"></textarea>
+    <label>
+        <input type="checkbox" id="removeTopic"> Remove " - Topic"
+    </label>
+    <hr>
+    <p>
+        Script to turn output from this chrome extension <a href="https://chromewebstore.google.com/detail/youtube-advanced-playlist/njipopjohbjffopcfebochjnjbejhfpc">YouTube Advanced Playlist Export</a> (<a href="https://github.com/piniek435/YouTube-Advanced-Playlist-Export">Github</a>) into a format readable by the MusicBrainz track Parser. 
+    </p>
+    <script>
+        function formatVideoList() {
+            const inputList = document.getElementById('videoInput').value;
+            const lines = inputList.split('\n\n');
+            let result = '';
+        
+            for (let i = 0; i < lines.length; i++) {
+                const videoInfo = lines[i].split('\n');
+                const titleLine = videoInfo.find(line => line.startsWith('Title:'));
+                const authorLine = videoInfo.find(line => line.startsWith('Author:'));
+                const lengthLine = videoInfo.find(line => line.startsWith('Length:'));
+        
+                if (titleLine && authorLine && lengthLine) {
+                    const title = titleLine.split(': ')[1];
+                    var author = authorLine.split(': ')[1];
+                    const length = lengthLine.split(': ')[1];
+                    if (document.getElementById('removeTopic').checked) {
+                        author = author.replace(' - Topic', '');
+                    }
+                    result += `${i + 1}. ${title} - ${author} (${length})\n`;
+                } else {
+                    // Handle missing properties (e.g., log an error or skip this entry)
+                    console.error(`Incomplete video entry at index ${i}`);
+                }
+            }
+        
+            const videoListElement = document.getElementById('videoOutput');
+            videoListElement.innerHTML = result;
+        }
+    </script>
+</body>
+</html>
