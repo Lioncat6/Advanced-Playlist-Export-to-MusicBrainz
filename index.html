@@ -85,6 +85,9 @@
     <label>
         <input type="checkbox" id="removeTopic"> Remove " - Topic"
     </label>
+    <label>
+        <input type="checkbox" id="subtractOneSecond"> Subtract a second from timestamps because YouTube is dumb
+    </label>
     <hr>
     <p>
         Script to turn output from this chrome extension <a href="https://chromewebstore.google.com/detail/youtube-advanced-playlist/njipopjohbjffopcfebochjnjbejhfpc">YouTube Advanced Playlist Export</a> (<a href="https://github.com/piniek435/YouTube-Advanced-Playlist-Export">Github</a>) into a format readable by the MusicBrainz track Parser. 
@@ -104,11 +107,20 @@
                 if (titleLine && authorLine && lengthLine) {
                     const title = titleLine.split(': ')[1];
                     var author = authorLine.split(': ')[1];
-                    const length = lengthLine.split(': ')[1];
+                    var length = lengthLine.split(': ')[1];
                     if (document.getElementById('removeTopic').checked) {
                         author = author.replace(' - Topic', '');
                     }
-                    result += `${i + 1}. ${title} - ${author} (${length})\n`;
+                    if (document.getElementById('subtractOneSecond').checked) {
+                        const [minutes, seconds] = length.split(':').map(Number);
+                        const totalSeconds = minutes * 60 + seconds;
+                        const adjustedSeconds = Math.max(0, totalSeconds - 1);
+                        const adjustedMinutes = Math.floor(adjustedSeconds / 60);
+                        const adjustedLength = `${adjustedMinutes}:${adjustedSeconds % 60}`;
+                        result += `${i + 1}. ${title} - ${author} (${adjustedLength})\n`;
+                    } else {
+                        result += `${i + 1}. ${title} - ${author} (${length})\n`;
+                    }
                 } else {
                     // Handle missing properties (e.g., log an error or skip this entry)
                     console.error(`Incomplete video entry at index ${i}`);
